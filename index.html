@@ -1,0 +1,1324 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Chess Arena — PARESH vs DEVEN</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;600;700;800;900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    /* Chess.com palette */
+    --board-light: #eeeed2;
+    --board-dark: #769656;
+    --green: #769656;
+    --green-bright: #81b64c;
+    --green-dark: #5d7c3f;
+    --green-darker: #3d5a26;
+    --cream: #f7f6f1;
+    --cream-2: #edecdf;
+    --gray-50: #fafafa;
+    --gray-100: #f4f4f4;
+    --gray-200: #e8e8e8;
+    --gray-300: #d1d1d1;
+    --gray-400: #999999;
+    --gray-500: #6f6f6f;
+    --gray-700: #444444;
+    --gray-900: #1f1f1f;
+    --white: #ffffff;
+    --gold: #d4a72c;
+    --gold-soft: #fef3c7;
+    --rose: #c93838;
+
+    --shadow-sm: 0 1px 2px rgba(0,0,0,0.05);
+    --shadow-md: 0 4px 12px rgba(0,0,0,0.08);
+    --shadow-lg: 0 8px 24px rgba(0,0,0,0.12);
+    --shadow-green: 0 6px 20px rgba(118, 150, 86, 0.25);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html, body { background: var(--cream); }
+
+  body {
+    font-family: 'Inter', 'Segoe UI', sans-serif;
+    color: var(--gray-900);
+    min-height: 100vh;
+    padding: 24px 16px 40px;
+    position: relative;
+    overflow-x: hidden;
+  }
+
+  /* CHESSBOARD BACKGROUND */
+  body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 0;
+    background-image:
+      linear-gradient(45deg, var(--board-dark) 25%, transparent 25%),
+      linear-gradient(-45deg, var(--board-dark) 25%, transparent 25%),
+      linear-gradient(45deg, transparent 75%, var(--board-dark) 75%),
+      linear-gradient(-45deg, transparent 75%, var(--board-dark) 75%);
+    background-size: 80px 80px;
+    background-position: 0 0, 0 40px, 40px -40px, -40px 0;
+    background-color: var(--board-light);
+    opacity: 0.18;
+  }
+
+  /* Soft overlay to fade the board */
+  body::after {
+    content: "";
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 0;
+    background:
+      radial-gradient(ellipse at center, transparent 0%, rgba(247, 246, 241, 0.65) 70%, var(--cream) 100%);
+  }
+
+  .container {
+    max-width: 720px;
+    margin: 0 auto;
+    position: relative;
+    z-index: 1;
+  }
+
+  /* ========== HEADER ========== */
+  .header {
+    text-align: center;
+    margin-bottom: 20px;
+  }
+  .header-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 14px;
+    font-family: 'Montserrat', sans-serif;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    color: var(--white);
+    background: var(--green);
+    border-radius: 100px;
+    margin-bottom: 12px;
+    text-transform: uppercase;
+    box-shadow: var(--shadow-green);
+  }
+  .header-badge .live-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #fff;
+    box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.6);
+    animation: pulse-dot 2s ease-in-out infinite;
+  }
+  @keyframes pulse-dot {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.5); }
+    50% { box-shadow: 0 0 0 6px rgba(255, 255, 255, 0); }
+  }
+  .header h1 {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 36px;
+    font-weight: 900;
+    letter-spacing: 1px;
+    color: var(--gray-900);
+    line-height: 1;
+    text-transform: uppercase;
+  }
+  .header h1 .accent { color: var(--green); }
+  .header-sub {
+    margin-top: 8px;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--gray-500);
+  }
+  .header-sub .num {
+    color: var(--green-dark);
+    font-weight: 800;
+  }
+
+  /* ========== QUICK PLAY BUTTON ========== */
+  .quick-play {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 14px;
+    width: 100%;
+    padding: 18px;
+    margin-bottom: 20px;
+    background: linear-gradient(180deg, var(--green-bright) 0%, var(--green) 100%);
+    color: var(--white);
+    border: none;
+    border-radius: 14px;
+    font-family: 'Montserrat', sans-serif;
+    font-size: 15px;
+    font-weight: 800;
+    letter-spacing: 2px;
+    cursor: pointer;
+    text-decoration: none;
+    text-transform: uppercase;
+    box-shadow:
+      0 6px 16px rgba(118, 150, 86, 0.35),
+      inset 0 1px 0 rgba(255, 255, 255, 0.25),
+      inset 0 -2px 0 rgba(0, 0, 0, 0.1);
+    transition: all 0.2s ease;
+    position: relative;
+    overflow: hidden;
+  }
+  .quick-play::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.25), transparent);
+    transform: translateX(-100%);
+    transition: transform 0.6s;
+  }
+  .quick-play:hover {
+    transform: translateY(-2px);
+    box-shadow:
+      0 10px 22px rgba(118, 150, 86, 0.4),
+      inset 0 1px 0 rgba(255, 255, 255, 0.3),
+      inset 0 -2px 0 rgba(0, 0, 0, 0.1);
+  }
+  .quick-play:hover::before { transform: translateX(100%); }
+  .quick-play:active { transform: translateY(0); }
+  .quick-play .bolt, .quick-play .piece { font-size: 22px; }
+
+  /* ========== CARDS ========== */
+  .card {
+    background: var(--white);
+    border: 1px solid var(--gray-200);
+    border-radius: 16px;
+    padding: 22px;
+    margin-bottom: 16px;
+    box-shadow: var(--shadow-md);
+    position: relative;
+  }
+  .card-emphasis {
+    border-top: 4px solid var(--green);
+  }
+
+  .section-label {
+    font-family: 'Montserrat', sans-serif;
+    text-align: center;
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 3px;
+    color: var(--green-dark);
+    text-transform: uppercase;
+    margin-bottom: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+  }
+  .section-label::before, .section-label::after {
+    content: "";
+    height: 1px;
+    flex: 1;
+    max-width: 40px;
+    background: linear-gradient(90deg, transparent, var(--gray-300), transparent);
+  }
+
+  /* ========== PLAYERS ========== */
+  .players-row {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    gap: 14px;
+    align-items: stretch;
+  }
+  .player-card {
+    text-align: center;
+    border-radius: 14px;
+    padding: 16px 10px;
+    position: relative;
+    overflow: hidden;
+    transition: all 0.25s ease;
+  }
+  .player-card:hover {
+    transform: translateY(-3px);
+  }
+
+  .player-white-side {
+    background: linear-gradient(180deg, var(--gray-50), var(--white));
+    border: 2px solid var(--gray-200);
+    box-shadow: var(--shadow-sm);
+  }
+  .player-white-side:hover {
+    border-color: var(--green);
+    box-shadow: var(--shadow-green);
+  }
+
+  .player-black-side {
+    background: linear-gradient(180deg, var(--gray-700), var(--gray-900));
+    border: 2px solid var(--gray-900);
+    box-shadow: var(--shadow-sm);
+  }
+  .player-black-side:hover {
+    border-color: var(--green-bright);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+  }
+
+  /* AVATAR */
+  .player-avatar-wrap {
+    display: inline-block;
+    position: relative;
+    padding: 3px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--green-bright), var(--green-dark));
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+    line-height: 0;
+  }
+  .player-black-side .player-avatar-wrap {
+    background: linear-gradient(135deg, var(--gold), #b8861f);
+  }
+  .player-avatar {
+    width: 76px;
+    height: 76px;
+    border-radius: 50%;
+    display: block;
+    background: var(--white);
+    object-fit: cover;
+  }
+  .player-black-side .player-avatar {
+    background: var(--gray-200);
+  }
+
+  .player-name {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 15px;
+    font-weight: 800;
+    letter-spacing: 1px;
+    margin-top: 10px;
+  }
+  .player-white-side .player-name { color: var(--gray-900); }
+  .player-black-side .player-name { color: var(--white); }
+
+  .player-username {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 11px;
+    font-weight: 600;
+    margin-top: 4px;
+    padding: 3px 10px;
+    border-radius: 100px;
+    text-decoration: none;
+    transition: all 0.2s;
+    cursor: pointer;
+  }
+  .player-white-side .player-username {
+    color: var(--green-dark);
+    background: rgba(118, 150, 86, 0.08);
+    border: 1px solid rgba(118, 150, 86, 0.2);
+  }
+  .player-white-side .player-username:hover {
+    background: var(--green);
+    color: var(--white);
+    border-color: var(--green);
+  }
+  .player-black-side .player-username {
+    color: var(--green-bright);
+    background: rgba(129, 182, 76, 0.12);
+    border: 1px solid rgba(129, 182, 76, 0.3);
+  }
+  .player-black-side .player-username:hover {
+    background: var(--green-bright);
+    color: var(--gray-900);
+    border-color: var(--green-bright);
+  }
+
+  .player-wins {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 46px;
+    font-weight: 900;
+    margin-top: 10px;
+    line-height: 1;
+  }
+  .player-white-side .player-wins { color: var(--green); }
+  .player-black-side .player-wins { color: var(--green-bright); }
+
+  .player-wins-label {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    margin-top: 2px;
+  }
+  .player-white-side .player-wins-label { color: var(--gray-500); }
+  .player-black-side .player-wins-label { color: var(--gray-400); }
+
+  .player-color-breakdown {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    margin-top: 10px;
+    font-size: 11px;
+    font-weight: 700;
+  }
+  .player-white-side .player-color-breakdown span {
+    padding: 3px 8px;
+    border-radius: 6px;
+    background: var(--gray-100);
+    color: var(--gray-700);
+    border: 1px solid var(--gray-200);
+  }
+  .player-black-side .player-color-breakdown span {
+    padding: 3px 8px;
+    border-radius: 6px;
+    background: rgba(255, 255, 255, 0.08);
+    color: var(--gray-200);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+  }
+
+  .draws-block {
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+  .draws-label {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 2px;
+    color: var(--gray-500);
+    margin-bottom: 8px;
+    text-transform: uppercase;
+  }
+  .draws-circle {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #e9b949, var(--gold));
+    border: 3px solid var(--white);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto;
+    font-family: 'Montserrat', sans-serif;
+    font-size: 24px;
+    font-weight: 900;
+    color: var(--white);
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.15);
+    box-shadow:
+      0 6px 16px rgba(212, 167, 44, 0.3),
+      inset 0 -2px 0 rgba(0, 0, 0, 0.1);
+  }
+  .draws-sub {
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--gray-500);
+    margin-top: 6px;
+  }
+
+  /* Leader banner */
+  .leader-bar {
+    margin-top: 18px;
+    padding: 12px;
+    background: linear-gradient(90deg, var(--gold-soft), #fde68a, var(--gold-soft));
+    border: 1px solid var(--gold);
+    border-radius: 10px;
+    text-align: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    font-family: 'Montserrat', sans-serif;
+    font-size: 13px;
+    font-weight: 800;
+    color: #92670c;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+  }
+  .leader-bar .crown { font-size: 20px; }
+
+  /* Edit names */
+  .edit-names-btn {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    background: var(--white);
+    border: 1px solid var(--gray-300);
+    color: var(--gray-500);
+    font-family: 'Montserrat', sans-serif;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    cursor: pointer;
+    padding: 5px 10px;
+    border-radius: 6px;
+    text-transform: uppercase;
+    transition: all 0.2s;
+  }
+  .edit-names-btn:hover {
+    color: var(--green);
+    border-color: var(--green);
+    background: rgba(118, 150, 86, 0.05);
+  }
+
+  .names-form { display: flex; flex-direction: column; gap: 10px; }
+  .names-form .input-group {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  .names-form label {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    color: var(--gray-500);
+    text-transform: uppercase;
+  }
+  .names-form input {
+    width: 100%;
+    padding: 11px 14px;
+    background: var(--gray-50);
+    border: 1px solid var(--gray-300);
+    border-radius: 10px;
+    color: var(--gray-900);
+    font-size: 14px;
+    font-weight: 600;
+    font-family: 'Inter', sans-serif;
+    outline: none;
+    transition: all 0.2s;
+  }
+  .names-form input:focus {
+    border-color: var(--green);
+    box-shadow: 0 0 0 3px rgba(118, 150, 86, 0.15);
+    background: var(--white);
+  }
+  .names-form-row { display: flex; gap: 8px; }
+  .names-form-row > * { flex: 1; }
+
+  /* ========== BUTTONS ========== */
+  .btn {
+    padding: 11px 14px;
+    border-radius: 10px;
+    border: 1px solid;
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 700;
+    font-size: 12px;
+    letter-spacing: 1px;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    text-transform: uppercase;
+    transition: all 0.2s;
+    background: transparent;
+  }
+  .btn-green {
+    background: var(--green);
+    border-color: var(--green);
+    color: var(--white);
+    box-shadow: 0 4px 10px rgba(118, 150, 86, 0.25);
+  }
+  .btn-green:hover {
+    background: var(--green-dark);
+    border-color: var(--green-dark);
+    box-shadow: 0 6px 14px rgba(118, 150, 86, 0.35);
+  }
+  .btn-ghost {
+    background: var(--white);
+    border-color: var(--gray-300);
+    color: var(--gray-700);
+  }
+  .btn-ghost:hover {
+    background: var(--gray-50);
+    border-color: var(--gray-400);
+    color: var(--gray-900);
+  }
+
+  /* Record game buttons */
+  .record-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 10px;
+  }
+  .record-btn {
+    padding: 18px 8px;
+    border-radius: 12px;
+    border: 2px solid;
+    cursor: pointer;
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 800;
+    text-transform: uppercase;
+    transition: all 0.2s;
+    background: var(--white);
+    color: var(--gray-900);
+  }
+  .record-btn:hover { transform: translateY(-2px); }
+  .record-btn:active { transform: translateY(0); }
+
+  .record-btn-light {
+    border-color: var(--gray-300);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.06);
+  }
+  .record-btn-light:hover {
+    border-color: var(--green);
+    background: rgba(118, 150, 86, 0.04);
+    box-shadow: 0 6px 14px rgba(118, 150, 86, 0.18);
+  }
+  .record-btn-gold {
+    border-color: var(--gray-300);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.06);
+  }
+  .record-btn-gold:hover {
+    border-color: var(--gold);
+    background: var(--gold-soft);
+    box-shadow: 0 6px 14px rgba(212, 167, 44, 0.2);
+  }
+  .record-btn-dark {
+    background: var(--gray-900);
+    color: var(--white);
+    border-color: var(--gray-900);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+  }
+  .record-btn-dark:hover {
+    background: var(--gray-700);
+    border-color: var(--gray-700);
+    box-shadow: 0 6px 14px rgba(0, 0, 0, 0.25);
+  }
+
+  .record-btn-piece { font-size: 28px; line-height: 1; }
+  .record-btn-label { font-size: 11px; margin-top: 6px; letter-spacing: 1px; }
+
+  /* Color selection form */
+  .form-panel {
+    background: var(--white);
+    border: 2px solid var(--green);
+    border-radius: 16px;
+    padding: 22px;
+    margin-bottom: 16px;
+    box-shadow: var(--shadow-green);
+  }
+  .color-choice-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-bottom: 14px;
+  }
+  .color-choice {
+    padding: 16px 10px;
+    border-radius: 12px;
+    border: 2px solid;
+    cursor: pointer;
+    text-align: center;
+    font-family: 'Montserrat', sans-serif;
+    transition: all 0.2s;
+  }
+  .color-choice .cc-piece { font-size: 32px; line-height: 1; }
+  .color-choice .cc-main { font-size: 11px; font-weight: 800; margin-top: 6px; letter-spacing: 1px; }
+  .color-choice .cc-sub { font-size: 9px; margin-top: 4px; font-weight: 600; opacity: 0.7; letter-spacing: 0.5px; text-transform: uppercase; }
+  .color-choice-white {
+    background: var(--white);
+    border-color: var(--gray-300);
+    color: var(--gray-900);
+  }
+  .color-choice-white.selected {
+    background: var(--gray-50);
+    border-color: var(--green);
+    box-shadow: 0 4px 14px rgba(118, 150, 86, 0.2);
+  }
+  .color-choice-black {
+    background: var(--gray-700);
+    border-color: var(--gray-700);
+    color: var(--white);
+  }
+  .color-choice-black.selected {
+    background: var(--gray-900);
+    border-color: var(--green-bright);
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.3);
+  }
+  .result-display {
+    text-align: center;
+    background: var(--gold-soft);
+    padding: 12px;
+    border-radius: 10px;
+    margin-bottom: 14px;
+    border: 1px solid var(--gold);
+  }
+  .result-display-label {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 2px;
+    color: #92670c;
+    text-transform: uppercase;
+  }
+  .result-display-value {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 14px;
+    font-weight: 800;
+    color: var(--gray-900);
+    margin-top: 4px;
+  }
+  .form-actions { display: flex; gap: 8px; }
+  .form-actions .btn-green { flex: 1; padding: 14px; font-size: 13px; }
+
+  /* ========== FILTERS ========== */
+  .filter-bar {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+    margin-bottom: 12px;
+    padding: 8px;
+    background: var(--gray-50);
+    border-radius: 12px;
+    border: 1px solid var(--gray-200);
+  }
+  .filter-chip {
+    padding: 8px 12px;
+    border-radius: 8px;
+    border: 1px solid var(--gray-200);
+    background: var(--white);
+    color: var(--gray-500);
+    font-family: 'Montserrat', sans-serif;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    cursor: pointer;
+    text-transform: uppercase;
+    transition: all 0.2s;
+    white-space: nowrap;
+  }
+  .filter-chip:hover {
+    color: var(--gray-900);
+    border-color: var(--gray-300);
+  }
+  .filter-chip.active {
+    background: var(--green);
+    border-color: var(--green);
+    color: var(--white);
+    box-shadow: 0 3px 8px rgba(118, 150, 86, 0.3);
+  }
+  .filter-stats {
+    padding: 10px 14px;
+    background: rgba(118, 150, 86, 0.08);
+    border: 1px solid rgba(118, 150, 86, 0.2);
+    border-radius: 10px;
+    font-family: 'Montserrat', sans-serif;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--gray-700);
+    margin-bottom: 12px;
+    letter-spacing: 0.5px;
+    text-align: center;
+  }
+  .filter-stats .highlight {
+    color: var(--green-dark);
+    font-weight: 800;
+  }
+
+  /* ========== HISTORY ========== */
+  .history-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 14px;
+  }
+  .history-empty {
+    text-align: center;
+    padding: 36px 16px;
+    color: var(--gray-400);
+    font-style: italic;
+    font-size: 13px;
+  }
+  .history-list {
+    max-height: 420px;
+    overflow-y: auto;
+    padding-right: 4px;
+  }
+  .history-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 12px;
+    border-radius: 10px;
+    margin-bottom: 4px;
+    background: var(--gray-50);
+    border: 1px solid transparent;
+    transition: all 0.15s;
+  }
+  .history-item:hover {
+    background: var(--white);
+    border-color: var(--gray-200);
+    box-shadow: var(--shadow-sm);
+  }
+  .history-item.win-p1 { border-left: 3px solid var(--green); }
+  .history-item.win-p2 { border-left: 3px solid var(--gray-900); }
+  .history-item.win-draw { border-left: 3px solid var(--gold); }
+
+  .history-item-left {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex: 1;
+    min-width: 0;
+  }
+  .history-num {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 10px;
+    font-weight: 800;
+    background: var(--gray-200);
+    color: var(--gray-700);
+    border-radius: 5px;
+    padding: 3px 7px;
+    flex-shrink: 0;
+    min-width: 32px;
+    text-align: center;
+  }
+  .history-text {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--gray-700);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .history-text .winner-green { color: var(--green-dark); font-weight: 800; }
+  .history-text .winner-dark { color: var(--gray-900); font-weight: 800; }
+  .history-text .muted { color: var(--gray-400); }
+  .history-text .draw-text { color: #92670c; font-style: italic; font-weight: 700; }
+  .history-right {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-shrink: 0;
+  }
+  .history-date {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 10px;
+    font-weight: 700;
+    color: var(--gray-400);
+  }
+  .history-delete {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: var(--gray-300);
+    opacity: 0.6;
+    padding: 4px 6px;
+    border-radius: 4px;
+    font-size: 12px;
+    line-height: 1;
+    transition: all 0.15s;
+  }
+  .history-delete:hover {
+    opacity: 1;
+    color: var(--rose);
+    background: rgba(201, 56, 56, 0.08);
+  }
+
+  /* Backup section */
+  .backup-section {
+    margin-top: 16px;
+    display: flex;
+    gap: 8px;
+  }
+  .backup-section .btn { flex: 1; padding: 11px; font-size: 11px; }
+
+  .footer {
+    text-align: center;
+    font-family: 'Montserrat', sans-serif;
+    font-size: 10px;
+    font-weight: 700;
+    color: var(--gray-400);
+    margin-top: 24px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+  }
+  .footer .accent { color: var(--green); }
+
+  #importFile { display: none; }
+
+  /* Scrollbar */
+  .history-list::-webkit-scrollbar { width: 6px; }
+  .history-list::-webkit-scrollbar-track { background: var(--gray-100); border-radius: 3px; }
+  .history-list::-webkit-scrollbar-thumb { background: var(--gray-300); border-radius: 3px; }
+  .history-list::-webkit-scrollbar-thumb:hover { background: var(--green); }
+
+  /* Small screens */
+  @media (max-width: 420px) {
+    body { padding: 16px 12px 32px; }
+    .header h1 { font-size: 26px; }
+    .players-row { gap: 8px; }
+    .player-card { padding: 12px 6px; }
+    .player-avatar { width: 60px; height: 60px; }
+    .player-wins { font-size: 36px; }
+    .draws-circle { width: 52px; height: 52px; font-size: 20px; }
+    .quick-play { padding: 15px; font-size: 13px; letter-spacing: 1px; }
+    .card { padding: 16px; }
+    .record-btn-piece { font-size: 24px; }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <!-- HEADER -->
+  <div class="header">
+    <div class="header-badge">
+      <span class="live-dot"></span>
+      <span>LIVE ARENA</span>
+    </div>
+    <h1>Chess <span class="accent">Arena</span></h1>
+    <div class="header-sub"><span class="num" id="totalGamesNum">0</span> games played · <span id="totalVs">PARESH vs DEVEN</span></div>
+  </div>
+
+  <!-- QUICK PLAY -->
+  <a href="https://www.chess.com/live" target="_blank" rel="noopener" class="quick-play">
+    <span class="bolt">⚡</span>
+    <span>Quick Play on Chess.com</span>
+    <span class="piece">♞</span>
+  </a>
+
+  <!-- PLAYERS -->
+  <div class="card card-emphasis" id="playersCard"></div>
+
+  <!-- RECORD GAME / FORM -->
+  <div id="recordSection"></div>
+
+  <!-- HISTORY WITH FILTERS -->
+  <div class="card">
+    <div class="history-header">
+      <div class="section-label" style="margin-bottom:0;">Game Log</div>
+      <span style="font-size: 18px;">🏆</span>
+    </div>
+
+    <div class="filter-bar" id="filterPlayer">
+      <button class="filter-chip active" data-player="all" onclick="setFilter('player', 'all')">All Players</button>
+      <button class="filter-chip" data-player="p1" onclick="setFilter('player', 'p1')" id="filterPlayerP1">PARESH</button>
+      <button class="filter-chip" data-player="p2" onclick="setFilter('player', 'p2')" id="filterPlayerP2">DEVEN</button>
+    </div>
+
+    <div class="filter-bar" id="filterColor">
+      <button class="filter-chip active" data-color="all" onclick="setFilter('color', 'all')">All Colors</button>
+      <button class="filter-chip" data-color="white" onclick="setFilter('color', 'white')">♔ Played White</button>
+      <button class="filter-chip" data-color="black" onclick="setFilter('color', 'black')">♚ Played Black</button>
+    </div>
+
+    <div class="filter-bar" id="filterResult">
+      <button class="filter-chip active" data-result="all" onclick="setFilter('result', 'all')">All Results</button>
+      <button class="filter-chip" data-result="wins" onclick="setFilter('result', 'wins')">Wins Only</button>
+      <button class="filter-chip" data-result="draws" onclick="setFilter('result', 'draws')">Draws Only</button>
+    </div>
+
+    <div id="filterStats"></div>
+    <div id="historyList"></div>
+  </div>
+
+  <!-- BACKUP -->
+  <div class="backup-section">
+    <button class="btn btn-green" onclick="exportData()">⬇ Export JSON</button>
+    <button class="btn btn-ghost" onclick="document.getElementById('importFile').click()">⬆ Import JSON</button>
+    <input type="file" id="importFile" accept=".json,application/json" onchange="importData(event)">
+  </div>
+
+  <div class="footer">♟ <span class="accent">Data Saved Locally</span> · Backup via JSON ♟</div>
+</div>
+
+<script>
+  // ============== STATE ==============
+  const STORAGE_KEY_PLAYERS = 'chess_scoreboard_players';
+  const STORAGE_KEY_GAMES = 'chess_scoreboard_games';
+
+  // Local image files placed next to index.html
+  // Make sure these filenames exist in your repo root: paresh_img.png, deven_img.png
+  const AVATAR_FILES = {
+    p1: 'paresh.jpg',
+    p2: 'deven.jpg',
+  };
+  // Inline SVG fallback (initial in a colored circle) shown if the image file is missing
+  function initialSvgDataUri(name, bg, fg) {
+    const letter = (name || '?').trim().charAt(0).toUpperCase();
+    const svg = `<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='50' fill='${bg}'/><text x='50' y='52' font-family='Montserrat,Arial,sans-serif' font-size='44' font-weight='800' fill='${fg}' text-anchor='middle' dominant-baseline='central'>${letter}</text></svg>`;
+    return 'data:image/svg+xml;utf8,' + encodeURIComponent(svg);
+  }
+
+  let players = { p1: 'PARESH', p2: 'DEVEN', u1: 'feedspottest', u2: 'devenkalathiya' };
+  let games = [];
+  let editingNames = false;
+
+  let formOpen = false;
+  let formWinner = null;
+  let formP1Color = 'white';
+
+  let filters = { player: 'all', color: 'all', result: 'all' };
+
+  // ============== STORAGE ==============
+  function loadData() {
+    try {
+      const p = localStorage.getItem(STORAGE_KEY_PLAYERS);
+      if (p) {
+        const parsed = JSON.parse(p);
+        players = {
+          p1: parsed.p1 || 'PARESH',
+          p2: parsed.p2 || 'DEVEN',
+          u1: parsed.u1 || 'feedspottest',
+          u2: parsed.u2 || 'devenkalathiya',
+        };
+      }
+    } catch (e) { console.warn('players load error', e); }
+    try {
+      const g = localStorage.getItem(STORAGE_KEY_GAMES);
+      if (g) games = JSON.parse(g);
+    } catch (e) { console.warn('games load error', e); }
+  }
+  function savePlayers() { try { localStorage.setItem(STORAGE_KEY_PLAYERS, JSON.stringify(players)); } catch (e) {} }
+  function saveGames() { try { localStorage.setItem(STORAGE_KEY_GAMES, JSON.stringify(games)); } catch (e) {} }
+
+  // ============== ACTIONS ==============
+  function openForm(winner) { formOpen = true; formWinner = winner; formP1Color = 'white'; renderRecordSection(); }
+  function closeForm() { formOpen = false; formWinner = null; renderRecordSection(); }
+  function setFormColor(c) { formP1Color = c; renderRecordSection(); }
+  function submitGame() {
+    games.unshift({ id: Date.now(), result: formWinner, p1Color: formP1Color, date: new Date().toISOString() });
+    saveGames();
+    closeForm();
+    renderAll();
+  }
+  function deleteGame(id) {
+    if (!confirm('Delete this game?')) return;
+    games = games.filter(g => g.id !== id);
+    saveGames();
+    renderAll();
+  }
+
+  function startEditNames() { editingNames = true; renderPlayers(); }
+  function cancelEditNames() { editingNames = false; renderPlayers(); }
+  function saveNames() {
+    const p1 = document.getElementById('inputP1').value.trim() || 'PARESH';
+    const p2 = document.getElementById('inputP2').value.trim() || 'DEVEN';
+    const u1 = document.getElementById('inputU1').value.trim() || 'feedspottest';
+    const u2 = document.getElementById('inputU2').value.trim() || 'devenkalathiya';
+    players = { p1, p2, u1, u2 };
+    savePlayers();
+    editingNames = false;
+    renderAll();
+  }
+
+  // ============== FILTERS ==============
+  function setFilter(type, value) { filters[type] = value; renderHistory(); updateFilterChips(); }
+  function updateFilterChips() {
+    document.querySelectorAll('#filterPlayer .filter-chip').forEach(c => c.classList.toggle('active', c.dataset.player === filters.player));
+    document.querySelectorAll('#filterColor .filter-chip').forEach(c => c.classList.toggle('active', c.dataset.color === filters.color));
+    document.querySelectorAll('#filterResult .filter-chip').forEach(c => c.classList.toggle('active', c.dataset.result === filters.result));
+  }
+  function applyFilters(list) {
+    return list.filter(game => {
+      const p1WasWhite = game.p1Color === 'white';
+      if (filters.player !== 'all' && filters.color !== 'all') {
+        const playerColor = filters.player === 'p1'
+          ? (p1WasWhite ? 'white' : 'black')
+          : (p1WasWhite ? 'black' : 'white');
+        if (playerColor !== filters.color) return false;
+      }
+      if (filters.result === 'wins') {
+        if (game.result === 'draw') return false;
+        if (filters.player !== 'all' && game.result !== filters.player) return false;
+      } else if (filters.result === 'draws') {
+        if (game.result !== 'draw') return false;
+      }
+      return true;
+    });
+  }
+
+  // ============== EXPORT / IMPORT ==============
+  function exportData() {
+    const data = { version: 1, exportedAt: new Date().toISOString(), players, games };
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    const stamp = new Date().toISOString().slice(0,10);
+    a.download = `chess-scoreboard-${stamp}.json`;
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  }
+  function importData(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = function(e) {
+      try {
+        const data = JSON.parse(e.target.result);
+        if (!data.players || !Array.isArray(data.games)) { alert('Invalid file format.'); return; }
+        if (!confirm('This will replace your current scores. Continue?')) return;
+        players = {
+          p1: data.players.p1 || 'PARESH',
+          p2: data.players.p2 || 'DEVEN',
+          u1: data.players.u1 || 'feedspottest',
+          u2: data.players.u2 || 'devenkalathiya',
+        };
+        games = data.games;
+        savePlayers(); saveGames(); renderAll();
+        alert('Import successful!');
+      } catch (err) { alert('Could not read file: ' + err.message); }
+    };
+    reader.readAsText(file);
+    event.target.value = '';
+  }
+
+  // ============== STATS ==============
+  function getStats() {
+    const p1Wins = games.filter(g => g.result === 'p1').length;
+    const p2Wins = games.filter(g => g.result === 'p2').length;
+    const draws = games.filter(g => g.result === 'draw').length;
+    const p1WhiteWins = games.filter(g => g.result === 'p1' && g.p1Color === 'white').length;
+    const p1BlackWins = games.filter(g => g.result === 'p1' && g.p1Color === 'black').length;
+    const p2WhiteWins = games.filter(g => g.result === 'p2' && g.p1Color === 'black').length;
+    const p2BlackWins = games.filter(g => g.result === 'p2' && g.p1Color === 'white').length;
+    return { p1Wins, p2Wins, draws, total: games.length, p1WhiteWins, p1BlackWins, p2WhiteWins, p2BlackWins };
+  }
+  function formatDate(iso) {
+    const d = new Date(iso);
+    return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+  }
+  function escapeHtml(s) {
+    return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c]);
+  }
+  function escapeAttr(s) {
+    return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c]);
+  }
+
+  // ============== RENDER ==============
+  function renderPlayers() {
+    const s = getStats();
+    const card = document.getElementById('playersCard');
+
+    if (editingNames) {
+      card.innerHTML = `
+        <div class="names-form">
+          <div class="section-label">Edit Player Details</div>
+          <div class="input-group">
+            <label>Player 1 Name</label>
+            <input id="inputP1" type="text" value="${escapeAttr(players.p1)}" placeholder="Player 1 name" />
+          </div>
+          <div class="input-group">
+            <label>Player 1 Chess.com Username</label>
+            <input id="inputU1" type="text" value="${escapeAttr(players.u1)}" placeholder="chess.com username" />
+          </div>
+          <div class="input-group">
+            <label>Player 2 Name</label>
+            <input id="inputP2" type="text" value="${escapeAttr(players.p2)}" placeholder="Player 2 name" />
+          </div>
+          <div class="input-group">
+            <label>Player 2 Chess.com Username</label>
+            <input id="inputU2" type="text" value="${escapeAttr(players.u2)}" placeholder="chess.com username" />
+          </div>
+          <div class="names-form-row">
+            <button class="btn btn-green" onclick="saveNames()">✓ Save</button>
+            <button class="btn btn-ghost" onclick="cancelEditNames()">✕ Cancel</button>
+          </div>
+          <div style="font-size:11px; color: var(--gray-400); text-align:center; margin-top: 4px;">
+            Tip: changing a name will give that player a different cartoon avatar.
+          </div>
+        </div>
+      `;
+      return;
+    }
+
+    const leaderHtml = (s.total > 0 && s.p1Wins !== s.p2Wins)
+      ? `<div class="leader-bar">
+           <span class="crown">👑</span>
+           <span>${escapeHtml(s.p1Wins > s.p2Wins ? players.p1 : players.p2)} leads by ${Math.abs(s.p1Wins - s.p2Wins)}</span>
+         </div>`
+      : '';
+
+    const colorBreakdownP1 = s.total > 0
+      ? `<div class="player-color-breakdown"><span>♔ ${s.p1WhiteWins}</span><span>♚ ${s.p1BlackWins}</span></div>` : '';
+    const colorBreakdownP2 = s.total > 0
+      ? `<div class="player-color-breakdown"><span>♔ ${s.p2WhiteWins}</span><span>♚ ${s.p2BlackWins}</span></div>` : '';
+
+    card.innerHTML = `
+      <button class="edit-names-btn" onclick="startEditNames()">✎ Edit</button>
+      <div class="players-row">
+        <div class="player-card player-white-side">
+          <div class="player-avatar-wrap">
+            <img class="player-avatar" src="${AVATAR_FILES.p1}" alt="${escapeAttr(players.p1)} avatar" onerror="this.onerror=null;this.src='${initialSvgDataUri(players.p1, '%23769656', '%23ffffff')}'"/>
+          </div>
+          <div class="player-name">${escapeHtml(players.p1)}</div>
+          <a class="player-username" href="https://www.chess.com/member/${encodeURIComponent(players.u1)}" target="_blank" rel="noopener">@${escapeHtml(players.u1)}</a>
+          <div class="player-wins">${s.p1Wins}</div>
+          <div class="player-wins-label">wins</div>
+          ${colorBreakdownP1}
+        </div>
+        <div class="draws-block">
+          <div class="draws-label">Draws</div>
+          <div class="draws-circle">${s.draws}</div>
+          <div class="draws-sub">½ — ½</div>
+        </div>
+        <div class="player-card player-black-side">
+          <div class="player-avatar-wrap">
+            <img class="player-avatar" src="${AVATAR_FILES.p2}" alt="${escapeAttr(players.p2)} avatar" onerror="this.onerror=null;this.src='${initialSvgDataUri(players.p2, '%231f1f1f', '%2381b64c')}'"/>
+          </div>
+          <div class="player-name">${escapeHtml(players.p2)}</div>
+          <a class="player-username" href="https://www.chess.com/member/${encodeURIComponent(players.u2)}" target="_blank" rel="noopener">@${escapeHtml(players.u2)}</a>
+          <div class="player-wins">${s.p2Wins}</div>
+          <div class="player-wins-label">wins</div>
+          ${colorBreakdownP2}
+        </div>
+      </div>
+      ${leaderHtml}
+    `;
+
+    document.getElementById('totalGamesNum').textContent = s.total;
+    document.getElementById('totalVs').textContent = `${players.p1} vs ${players.p2}`;
+    const fpP1 = document.getElementById('filterPlayerP1');
+    const fpP2 = document.getElementById('filterPlayerP2');
+    if (fpP1) fpP1.textContent = players.p1;
+    if (fpP2) fpP2.textContent = players.p2;
+  }
+
+  function renderRecordSection() {
+    const sec = document.getElementById('recordSection');
+    if (!formOpen) {
+      sec.innerHTML = `
+        <div class="card">
+          <div class="section-label">Record a New Game</div>
+          <div class="record-grid">
+            <button class="record-btn record-btn-light" onclick="openForm('p1')">
+              <div class="record-btn-piece">♔</div>
+              <div class="record-btn-label">${escapeHtml(players.p1)} won</div>
+            </button>
+            <button class="record-btn record-btn-gold" onclick="openForm('draw')">
+              <div class="record-btn-piece">½</div>
+              <div class="record-btn-label">Draw</div>
+            </button>
+            <button class="record-btn record-btn-dark" onclick="openForm('p2')">
+              <div class="record-btn-piece">♚</div>
+              <div class="record-btn-label">${escapeHtml(players.p2)} won</div>
+            </button>
+          </div>
+        </div>
+      `;
+      return;
+    }
+
+    const resultText = formWinner === 'draw' ? 'Draw'
+      : formWinner === 'p1' ? `${players.p1} won` : `${players.p2} won`;
+
+    sec.innerHTML = `
+      <div class="form-panel">
+        <div class="section-label">Who played which color?</div>
+        <div class="color-choice-grid">
+          <button class="color-choice color-choice-white ${formP1Color === 'white' ? 'selected' : ''}" onclick="setFormColor('white')">
+            <div class="cc-piece">♔</div>
+            <div class="cc-main">${escapeHtml(players.p1)} → WHITE</div>
+            <div class="cc-sub">${escapeHtml(players.p2)} was Black</div>
+          </button>
+          <button class="color-choice color-choice-black ${formP1Color === 'black' ? 'selected' : ''}" onclick="setFormColor('black')">
+            <div class="cc-piece">♚</div>
+            <div class="cc-main">${escapeHtml(players.p1)} → BLACK</div>
+            <div class="cc-sub">${escapeHtml(players.p2)} was White</div>
+          </button>
+        </div>
+        <div class="result-display">
+          <div class="result-display-label">Result</div>
+          <div class="result-display-value">${escapeHtml(resultText)}</div>
+        </div>
+        <div class="form-actions">
+          <button class="btn btn-green" onclick="submitGame()">✓ Save Game</button>
+          <button class="btn btn-ghost" onclick="closeForm()">✕</button>
+        </div>
+      </div>
+    `;
+  }
+
+  function buildFilterStats(filtered) {
+    if (games.length === 0) return '';
+    const isFiltered = filters.player !== 'all' || filters.color !== 'all' || filters.result !== 'all';
+    if (!isFiltered) return '';
+
+    let label = 'Showing ';
+    label += `<span class="highlight">${filtered.length}</span> of <span class="highlight">${games.length}</span> games`;
+
+    if (filters.player !== 'all') {
+      const playerName = filters.player === 'p1' ? players.p1 : players.p2;
+      let wins = 0, losses = 0, draws = 0;
+      filtered.forEach(g => {
+        if (g.result === 'draw') draws++;
+        else if (g.result === filters.player) wins++;
+        else losses++;
+      });
+      label += ` · <span class="highlight">${escapeHtml(playerName)}</span>: ${wins}W ${losses}L ${draws}D`;
+    }
+
+    return `<div class="filter-stats">${label}</div>`;
+  }
+
+  function renderHistory() {
+    const list = document.getElementById('historyList');
+    const statsEl = document.getElementById('filterStats');
+
+    if (games.length === 0) {
+      statsEl.innerHTML = '';
+      list.innerHTML = `<div class="history-empty">No games yet. Record your first match above!</div>`;
+      return;
+    }
+
+    const filtered = applyFilters(games);
+    statsEl.innerHTML = buildFilterStats(filtered);
+
+    if (filtered.length === 0) {
+      list.innerHTML = `<div class="history-empty">No games match the selected filters.</div>`;
+      return;
+    }
+
+    let html = '<div class="history-list">';
+    filtered.forEach(game => {
+      const origIdx = games.indexOf(game);
+      const gameNum = games.length - origIdx;
+      const p1WasWhite = game.p1Color === 'white';
+      let text = '';
+      let cls = '';
+      if (game.result === 'draw') {
+        text = `<span class="draw-text">Draw</span> <span class="muted">— ${escapeHtml(p1WasWhite ? players.p1 : players.p2)} (♔) vs ${escapeHtml(p1WasWhite ? players.p2 : players.p1)} (♚)</span>`;
+        cls = 'win-draw';
+      } else {
+        const winnerName = game.result === 'p1' ? players.p1 : players.p2;
+        const loserName = game.result === 'p1' ? players.p2 : players.p1;
+        const winnerWasWhite = (game.result === 'p1' && p1WasWhite) || (game.result === 'p2' && !p1WasWhite);
+        const winnerPiece = winnerWasWhite ? '♔' : '♚';
+        const winnerClass = game.result === 'p1' ? 'winner-green' : 'winner-dark';
+        text = `<span class="${winnerClass}">${escapeHtml(winnerName)}</span> <span class="muted">(${winnerPiece}) beat</span> ${escapeHtml(loserName)}`;
+        cls = game.result === 'p1' ? 'win-p1' : 'win-p2';
+      }
+      html += `
+        <div class="history-item ${cls}">
+          <div class="history-item-left">
+            <div class="history-num">#${gameNum}</div>
+            <div class="history-text">${text}</div>
+          </div>
+          <div class="history-right">
+            <div class="history-date">${formatDate(game.date)}</div>
+            <button class="history-delete" onclick="deleteGame(${game.id})" title="Delete game">✕</button>
+          </div>
+        </div>
+      `;
+    });
+    html += '</div>';
+    list.innerHTML = html;
+  }
+
+  function renderAll() {
+    renderPlayers();
+    renderRecordSection();
+    renderHistory();
+    updateFilterChips();
+  }
+
+  // ============== INIT ==============
+  loadData();
+  renderAll();
+</script>
+</body>
+</html>
